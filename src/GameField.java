@@ -30,20 +30,21 @@ public class GameField extends JPanel implements ActionListener {
 
 
 
-    public GameField() {
+    GameField() {
         setBackground(Color.BLACK);
         loadImage();
+        initGame();
 
     }
 
-    public void loadImage(){
+    private void loadImage(){
         ImageIcon imageApple = new ImageIcon("apple.png");
         apple = imageApple.getImage();
         ImageIcon imageDotSnake = new ImageIcon("snake.png");
         dotSnake = imageDotSnake.getImage();
     }
 
-    public void initGame() {
+    private void initGame() {
         for (int i =0; i < sizeSnake; i++){
             snakeX[i] = 48 - i * DOT_SIZE;
             snakeY[i] = 48;
@@ -54,23 +55,68 @@ public class GameField extends JPanel implements ActionListener {
 
     }
 
-    public void createApple(){
+    private void createApple(){
         appleX = new Random().nextInt(20) * DOT_SIZE;
         appleY= new Random().nextInt(20) * DOT_SIZE;
     }
 
-    public void move() {
+    private void move() {
         for (int i = sizeSnake; i > 0; i--) {
             snakeX[i] = snakeX[i-1];
             snakeY[i] = snakeY[i-1];
+        }
+
+        if (right){
+            snakeX[0] += DOT_SIZE;
+        }
+        if (left) {
+            snakeX[0] -= DOT_SIZE;
+        }
+        if (up) {
+            snakeY[0] -= DOT_SIZE;
+        }
+        if (down){
+            snakeY[0] += DOT_SIZE;
+        }
+    }
+
+    private void checkApple(){
+        if (snakeX[0] == appleX && snakeY[0] == appleY) {
+            sizeSnake++;
+            createApple();
+        }
+    }
+
+    private void checkWalls() {
+        for (int i = sizeSnake; i > 0 ; i--) {
+            if (i > 4 && snakeX[0] == snakeX[i] && snakeY[0] == snakeY[i]){
+                inGame = false;
+            }
+            if (snakeX[0] > SIZE) inGame = false;
+            if (snakeX[0] < 0) inGame = false;
+            if (snakeY[0] > SIZE) inGame = false;
+            if (snakeY[0] < 0) inGame = false;
         }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(inGame){
+            checkApple();
+            checkWalls();
             move();
         }
         repaint();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (inGame) {
+            g.drawImage(apple, appleX, appleY, this);
+            for (int i = 0; i < sizeSnake; i++) {
+                g.drawImage(dotSnake, snakeX[i], snakeY[i], this);
+            }
+        }
     }
 }
